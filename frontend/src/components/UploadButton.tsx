@@ -71,7 +71,7 @@ export function UploadButton({
       )}
     >
       <Upload size={28} />
-      <span>{uploading ? "Parsing" : "Upload"}</span>
+      <span>{uploading ? "Loading" : "Upload"}</span>
       <input
         className="absolute inset-0 cursor-pointer opacity-0 disabled:cursor-not-allowed"
         type="file"
