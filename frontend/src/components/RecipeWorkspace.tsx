@@ -134,7 +134,12 @@ export function RecipeWorkspace({
         ) : null}
       </section>
 
-      <ChatPanel recipe={recipe} threadId={threadId} />
+      <ChatPanel
+        currentStepIndex={recipeState.current_step}
+        onStepChange={updateStep}
+        recipe={recipe}
+        threadId={threadId}
+      />
     </div>
   );
 }
