@@ -79,8 +79,8 @@ export function RecipeWorkspace({
   return (
     <div
       className={cx(
-        "recipe-workspace mx-auto grid min-h-[calc(100vh-28px)] max-w-[1220px] grid-cols-1 gap-4 lg:h-full lg:min-h-0 xl:gap-5",
-        "lg:grid-cols-[minmax(0,1.8fr)_minmax(310px,0.8fr)]",
+        "recipe-workspace mx-auto grid min-h-[calc(100vh-28px)] max-w-[1220px] grid-cols-1 gap-4 xl:h-full xl:min-h-0 xl:gap-5",
+        "xl:grid-cols-[minmax(0,1.8fr)_minmax(310px,0.8fr)]",
       )}
     >
       <section className={cx(panelFrame, "workspace-panel flex min-w-0 flex-col gap-4 rounded-[22px] p-4 md:min-h-0 md:p-5 xl:p-6")}>
@@ -116,7 +116,7 @@ export function RecipeWorkspace({
           <>
             <RecipeOverview recipeState={recipeState} totalMinutes={totalMinutes} />
 
-            <div className="workspace-detail-grid grid min-h-0 flex-1 grid-cols-1 gap-4 xl:grid-cols-[minmax(230px,0.34fr)_minmax(0,1fr)]">
+            <div className="workspace-detail-grid grid min-h-0 flex-1 grid-cols-1 gap-4 xl:grid-cols-[minmax(280px,0.42fr)_minmax(0,1fr)]">
               <CookModePanel
                 currentStepIndex={recipeState.current_step}
                 cookingStarted={recipeState.cooking_started}

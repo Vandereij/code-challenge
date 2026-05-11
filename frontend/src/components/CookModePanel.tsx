@@ -76,8 +76,8 @@ function getStepProgressPercentage({
 
 function CurrentStepCard({ step }: { step: RecipeStep }) {
   return (
-    <div className="current-step-card grid shrink-0 grid-cols-[52px_1fr] gap-4 rounded-[18px] bg-[#213229] p-4 text-[#fffaf0] shadow-[0_16px_34px_rgba(33,50,41,0.2)] xl:grid-cols-[60px_1fr] xl:p-5">
-      <span className="flex size-[52px] items-center justify-center rounded-[16px] bg-[#f6dfb4] text-[1.18rem] font-bold text-[#243229] xl:size-[60px]">
+    <div className="current-step-card grid shrink-0 grid-cols-[40px_1fr] gap-3 rounded-[18px] bg-[#213229] p-4 text-[#fffaf0] shadow-[0_16px_34px_rgba(33,50,41,0.2)] xl:grid-cols-[44px_1fr]">
+      <span className="flex size-10 items-center justify-center rounded-[13px] bg-[#f6dfb4] text-[1rem] font-bold text-[#243229] xl:size-11">
         {step.step_number}
       </span>
       <div className="min-w-0">
@@ -104,10 +104,10 @@ function StepButton({
 }) {
   return (
     <button
-      className="step-button grid min-h-[76px] w-full cursor-pointer grid-cols-[46px_1fr] gap-3 rounded-[16px] bg-[#f2eadc] p-3 text-left text-[#243229] transition-[background,transform] duration-150 active:scale-[0.99]"
+      className="step-button grid min-h-[70px] w-full cursor-pointer grid-cols-[36px_1fr] gap-2.5 rounded-[16px] bg-[#f2eadc] p-3 text-left text-[#243229] transition-[background,transform] duration-150 active:scale-[0.99]"
       onClick={onClick}
     >
-      <span className="flex size-[46px] items-center justify-center rounded-[14px] bg-[#fffaf0] text-[1rem] font-bold text-[#315342]">
+      <span className="flex size-9 items-center justify-center rounded-[12px] bg-[#fffaf0] text-[0.92rem] font-bold text-[#315342]">
         {step.step_number}
       </span>
       <span className="min-w-0">

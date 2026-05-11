@@ -18,7 +18,7 @@ export default function App() {
       enableInspector={false}
       showDevConsole={false}
     >
-      <main className="app-shell min-h-screen bg-[linear-gradient(135deg,#f6f2ea,#edf1e8)] p-3.5 text-[#17211b] md:p-6 lg:h-dvh lg:min-h-0 lg:overflow-hidden">
+      <main className="app-shell min-h-screen bg-[linear-gradient(135deg,#f6f2ea,#edf1e8)] p-3.5 text-[#17211b] md:p-6 xl:h-dvh xl:min-h-0 xl:overflow-hidden">
         <RecipeWorkspace
           key={threadId ?? "empty"}
           initialState={initialState}

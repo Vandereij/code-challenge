@@ -87,13 +87,13 @@ function IngredientRow({
   return (
     <button
       className={cx(
-        "ingredient-row grid min-h-[70px] w-full cursor-pointer grid-cols-[42px_1fr] gap-2.5 rounded-[16px] p-2.5 text-left text-[#243229] transition-[background,transform] duration-150 active:scale-[0.98] xl:grid-cols-[48px_1fr] xl:gap-3",
+        "ingredient-row grid min-h-[64px] w-full cursor-pointer grid-cols-[24px_1fr] gap-2.5 rounded-[16px] p-2.5 text-left text-[#243229] transition-[background,transform] duration-150 active:scale-[0.98] xl:grid-cols-[26px_1fr] xl:gap-3",
         checked ? "bg-[#dce9d7]" : "bg-[#f2eadc]",
       )}
       onClick={onToggle}
     >
-      <span className="flex size-[42px] items-center justify-center rounded-[14px] border-2 border-[#8aa081] text-[0.88rem] font-bold text-[#315342] xl:size-12">
-        {checked ? <Check size={24} strokeWidth={3} /> : null}
+      <span className="flex size-6 items-center justify-center rounded-[8px] border-2 border-[#8aa081] text-[0.72rem] font-bold text-[#315342] xl:size-[26px]">
+        {checked ? <Check size={14} strokeWidth={3} /> : null}
       </span>
       <span className="flex min-w-0 flex-col justify-center">
         <strong className="[overflow-wrap:anywhere] text-base">{ingredient.name}</strong>

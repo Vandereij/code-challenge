@@ -80,7 +80,7 @@ export function ChatPanel({ recipe, threadId, currentStepIndex, onStepChange }: 
     : [{ title: "After upload", message: "What can you help me change in this recipe?" }];
 
   return (
-    <aside className={cx(panelFrame, "chat-panel flex min-h-[460px] flex-col rounded-[22px] lg:min-h-0")}>
+    <aside className={cx(panelFrame, "chat-panel flex min-h-[460px] flex-col rounded-[22px] xl:min-h-0")}>
       <div className="chat-panel-header flex flex-col gap-3 px-5 pt-5 pb-3 sm:flex-row sm:items-center sm:justify-between lg:flex-col lg:items-start">
         <div>
           <p className={eyebrowClass}>Live Agent</p>
