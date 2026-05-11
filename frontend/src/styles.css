@@ -33,4 +33,237 @@
     height: 100%;
     border: 0;
   }
+
+  @media (min-width: 900px) and (orientation: landscape) and (max-height: 820px) {
+    body {
+      overflow: hidden;
+    }
+
+    .app-shell {
+      padding: 14px !important;
+    }
+
+    .recipe-workspace {
+      height: calc(100dvh - 28px) !important;
+      gap: 12px !important;
+    }
+
+    .workspace-panel,
+    .chat-panel {
+      border-radius: 18px;
+    }
+
+    .workspace-panel {
+      gap: 12px !important;
+      padding: 14px !important;
+      overflow: hidden;
+    }
+
+    .workspace-header {
+      gap: 12px !important;
+    }
+
+    .workspace-header h1 {
+      display: -webkit-box;
+      overflow: hidden;
+      font-size: clamp(1.45rem, 2.2vw, 2rem);
+      line-height: 1.06;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+
+    .summary-pill-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      gap: 8px !important;
+    }
+
+    .summary-pill-grid > div {
+      min-height: 48px !important;
+      gap: 7px !important;
+      padding: 7px 8px !important;
+    }
+
+    .summary-pill-grid svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .summary-pill-grid strong {
+      font-size: 0.92rem;
+    }
+
+    .recipe-meta-grid {
+      grid-template-columns: minmax(170px, 0.32fr) minmax(0, 1fr) !important;
+      gap: 10px !important;
+    }
+
+    .recipe-meta-panel,
+    .dietary-panel {
+      border-radius: 14px;
+      padding: 8px !important;
+    }
+
+    .recipe-meta-panel {
+      grid-template-columns: minmax(0, 1fr) minmax(96px, 0.3fr) !important;
+      gap: 7px !important;
+    }
+
+    .recipe-meta-panel > div:first-child {
+      min-height: 50px;
+      padding: 8px;
+    }
+
+    .recipe-meta-panel strong,
+    .recipe-description {
+      font-size: 0.9rem;
+    }
+
+    .recipe-meta-panel > div:last-child strong {
+      font-size: 1.35rem;
+    }
+
+    .dietary-panel [class*="min-h-8"],
+    .dietary-panel [class*="min-h-9"] {
+      min-height: 26px;
+      padding-inline: 9px;
+    }
+
+    .dietary-panel {
+      min-height: auto;
+    }
+
+    .dietary-panel > p {
+      margin-bottom: 4px;
+    }
+
+    .recipe-description {
+      display: -webkit-box;
+      overflow: hidden;
+      line-height: 1.3;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+
+    .workspace-detail-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(230px, 0.45fr) !important;
+      gap: 12px !important;
+      overflow: hidden;
+    }
+
+    .ingredients-panel {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .cook-mode-panel {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .ingredients-panel,
+    .cook-mode-panel {
+      max-height: 100%;
+      border-radius: 16px;
+      padding: 12px !important;
+      scrollbar-width: thin;
+    }
+
+    .ingredients-heading,
+    .cook-mode-heading {
+      margin-bottom: 10px;
+    }
+
+    .ingredients-list {
+      gap: 8px !important;
+    }
+
+    .ingredient-row {
+      min-height: 58px !important;
+      grid-template-columns: 36px minmax(0, 1fr) !important;
+      gap: 8px !important;
+      border-radius: 13px;
+      padding: 8px !important;
+    }
+
+    .ingredient-row > span:first-child {
+      width: 36px;
+      height: 36px;
+      border-radius: 11px;
+    }
+
+    .ingredient-row strong,
+    .step-button [class*="text-[1rem]"] {
+      font-size: 0.9rem;
+      line-height: 1.2;
+    }
+
+    .ingredient-row small,
+    .ingredient-row span span:last-child {
+      font-size: 0.78rem;
+    }
+
+    .step-card-grid {
+      gap: 9px !important;
+      scrollbar-width: thin;
+    }
+
+    .current-step-card {
+      min-height: 0 !important;
+      grid-template-columns: 42px minmax(0, 1fr) !important;
+      gap: 10px !important;
+      border-radius: 14px;
+      padding: 12px !important;
+    }
+
+    .current-step-card > span:first-child {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      font-size: 1rem;
+    }
+
+    .current-step-card p {
+      margin-bottom: 8px;
+      font-size: 1.02rem;
+      line-height: 1.2;
+    }
+
+    .step-button {
+      min-height: 58px !important;
+      grid-template-columns: 36px minmax(0, 1fr) !important;
+      gap: 8px !important;
+      border-radius: 13px;
+      padding: 8px !important;
+    }
+
+    .step-button > span:first-child {
+      width: 36px;
+      height: 36px;
+      border-radius: 11px;
+    }
+
+    .step-controls {
+      gap: 8px !important;
+    }
+
+    .step-controls button {
+      min-height: 44px !important;
+      border-radius: 13px;
+      padding-inline: 10px !important;
+    }
+
+    .step-tips {
+      margin-top: 0;
+      padding: 0;
+    }
+
+    .chat-panel {
+      min-height: 0 !important;
+    }
+
+    .chat-panel-header {
+      gap: 8px !important;
+      padding: 14px 14px 8px !important;
+    }
+  }
 }

@@ -79,14 +79,12 @@ export function RecipeWorkspace({
   return (
     <div
       className={cx(
-        "mx-auto grid min-h-[calc(100vh-28px)] max-w-[1220px] grid-cols-1 gap-4 md:min-h-[calc(100vh-48px)] xl:gap-5",
-        recipe
-          ? "lg:grid-cols-[minmax(0,1fr)_minmax(240px,0.26fr)] xl:grid-cols-[minmax(0,1fr)_minmax(260px,0.26fr)]"
-          : "lg:grid-cols-[minmax(0,1.8fr)_minmax(330px,0.9fr)]",
+        "recipe-workspace mx-auto grid min-h-[calc(100vh-28px)] max-w-[1220px] grid-cols-1 gap-4 md:h-full md:min-h-0 xl:gap-5",
+        "lg:grid-cols-[minmax(0,1.8fr)_minmax(310px,0.8fr)]",
       )}
     >
-      <section className={cx(panelFrame, "flex min-w-0 flex-col gap-4 rounded-[22px] p-4 md:p-5 xl:p-6")}>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <section className={cx(panelFrame, "workspace-panel flex min-w-0 flex-col gap-4 rounded-[22px] p-4 md:min-h-0 md:p-5 xl:p-6")}>
+        <div className="workspace-header flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <p className={eyebrowClass}>Kitchen Companion</p>
             <h1 className="mb-0 [overflow-wrap:anywhere] text-[clamp(1.9rem,3vw,2.75rem)] leading-[1.06] tracking-normal">
@@ -118,7 +116,7 @@ export function RecipeWorkspace({
           <>
             <RecipeOverview recipeState={recipeState} totalMinutes={totalMinutes} />
 
-            <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 xl:grid-cols-[minmax(230px,0.34fr)_minmax(0,1fr)]">
+            <div className="workspace-detail-grid grid min-h-0 flex-1 grid-cols-1 gap-4 xl:grid-cols-[minmax(230px,0.34fr)_minmax(0,1fr)]">
               <CookModePanel
                 currentStepIndex={recipeState.current_step}
                 cookingStarted={recipeState.cooking_started}

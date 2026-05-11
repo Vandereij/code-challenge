@@ -41,8 +41,8 @@ export function IngredientsPanel({
     .filter((group) => group.ingredients.length > 0);
 
   return (
-    <section className="min-h-0 rounded-[20px] bg-[#fffaf0] p-4 md:p-[18px] xl:col-start-1 xl:row-start-1" aria-labelledby="ingredients-title">
-      <div className="mb-4 flex items-center justify-between gap-[18px]">
+    <section className="ingredients-panel min-h-0 overflow-y-auto rounded-[20px] bg-[#fffaf0] p-4 md:p-[18px] xl:col-start-1 xl:row-start-1" aria-labelledby="ingredients-title">
+      <div className="ingredients-heading mb-4 flex items-center justify-between gap-[18px]">
         <h2 className="mb-0 text-[1.18rem] font-bold xl:text-[1.3rem]" id="ingredients-title">
           Ingredients
         </h2>
@@ -50,7 +50,7 @@ export function IngredientsPanel({
           {checkedIngredients.length}/{ingredients.length}
         </span>
       </div>
-      <div className="grid gap-2.5 pr-1">
+      <div className="ingredients-list grid gap-2.5 pr-1">
         {groupedIngredients.map((group) => (
           <div key={group.category} className="grid gap-2">
             <div className="flex items-center justify-between gap-3 px-1 pt-1">
@@ -87,7 +87,7 @@ function IngredientRow({
   return (
     <button
       className={cx(
-        "grid min-h-[70px] w-full cursor-pointer grid-cols-[42px_1fr] gap-2.5 rounded-[16px] p-2.5 text-left text-[#243229] transition-[background,transform] duration-150 active:scale-[0.98] xl:grid-cols-[48px_1fr] xl:gap-3",
+        "ingredient-row grid min-h-[70px] w-full cursor-pointer grid-cols-[42px_1fr] gap-2.5 rounded-[16px] p-2.5 text-left text-[#243229] transition-[background,transform] duration-150 active:scale-[0.98] xl:grid-cols-[48px_1fr] xl:gap-3",
         checked ? "bg-[#dce9d7]" : "bg-[#f2eadc]",
       )}
       onClick={onToggle}
