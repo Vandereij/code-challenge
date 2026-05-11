@@ -15,13 +15,14 @@ export function CookModePanel({
   steps,
   onStepChange,
 }: CookModePanelProps) {
-  const progressPercentage = steps.length ? ((currentStepIndex + 1) / steps.length) * 100 : 0;
+  const progressPercentage = cookingStarted && steps.length ? ((currentStepIndex + 1) / steps.length) * 100 : 0;
   const currentStep = steps[currentStepIndex];
+  const nextSteps = steps.filter((_, index) => index !== currentStepIndex).slice(0, 2);
 
   return (
-    <section className="min-h-0 rounded-[20px] bg-[#fffaf0] p-[18px]" aria-labelledby="steps-title">
+    <section className="min-h-0 rounded-[20px] bg-[#fffaf0] p-4 md:p-[18px] xl:col-start-2 xl:row-start-1" aria-labelledby="steps-title">
       <div className="mb-4 flex items-center justify-between gap-[18px]">
-        <h2 className="mb-0 text-[1.3rem] font-bold" id="steps-title">
+        <h2 className="mb-0 text-[1.35rem] font-bold" id="steps-title">
           Cook Mode
         </h2>
         <span className={countPillClass}>
@@ -29,97 +30,135 @@ export function CookModePanel({
         </span>
       </div>
       <CookProgress percentage={progressPercentage} started={cookingStarted} />
-      <div className="grid gap-3">
-        <div className="grid max-h-[390px] gap-2.5 overflow-auto pr-1">
-          {steps.map((step, index) => (
-            <StepButton
-              key={step.step_number}
-              active={index === currentStepIndex}
-              step={step}
-              onClick={() => onStepChange(index)}
-            />
-          ))}
-        </div>
-        <div className="grid grid-cols-2 gap-2.5">
-          <button
-            className="inline-flex min-h-14 cursor-pointer items-center justify-center gap-2 rounded-[16px] bg-[#efe4d2] px-4 font-black text-[#243229] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
-            disabled={currentStepIndex === 0}
-            onClick={() => onStepChange(Math.max(0, currentStepIndex - 1))}
-          >
-            <ChevronLeft size={22} />
-            Previous
-          </button>
-          <button
-            className="inline-flex min-h-14 cursor-pointer items-center justify-center gap-2 rounded-[16px] bg-[#2f6f58] px-4 font-black text-[#fffdf8] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
-            disabled={currentStepIndex >= steps.length - 1}
-            onClick={() => onStepChange(Math.min(steps.length - 1, currentStepIndex + 1))}
-          >
-            Next
-            <ChevronRight size={22} />
-          </button>
-        </div>
+      <div className="grid gap-3 md:grid-rows-[auto_minmax(0,1fr)_auto]">
+        {currentStep ? <CurrentStepCard step={currentStep} /> : null}
+
+        {nextSteps.length > 0 ? (
+          <div className="grid gap-2 pr-1">
+            {nextSteps.map((step) => {
+              const index = steps.indexOf(step);
+              return (
+                <StepButton
+                  key={step.step_number}
+                  step={step}
+                  label={index < currentStepIndex ? "Done" : "Up next"}
+                  onClick={() => onStepChange(index)}
+                />
+              );
+            })}
+          </div>
+        ) : null}
+
+        <StepControls
+          currentStepIndex={currentStepIndex}
+          stepsLength={steps.length}
+          onStepChange={onStepChange}
+        />
       </div>
       <StepTips tips={currentStep?.tips ?? []} />
     </section>
   );
 }
 
+function CurrentStepCard({ step }: { step: RecipeStep }) {
+  return (
+    <div className="grid min-h-[156px] grid-cols-[52px_1fr] gap-4 rounded-[18px] bg-[#213229] p-4 text-[#fffaf0] shadow-[0_16px_34px_rgba(33,50,41,0.2)] xl:min-h-[176px] xl:grid-cols-[60px_1fr] xl:p-5">
+      <span className="flex size-[52px] items-center justify-center rounded-[16px] bg-[#f6dfb4] text-[1.18rem] font-bold text-[#243229] xl:size-[60px]">
+        {step.step_number}
+      </span>
+      <div className="min-w-0">
+        <p className="mb-3 [overflow-wrap:anywhere] text-[1.22rem] font-bold leading-[1.24] xl:text-[1.38rem]">
+          {step.instruction}
+        </p>
+        <StepMeta step={step} active />
+      </div>
+    </div>
+  );
+}
+
 function StepButton({
-  active,
   step,
+  label,
   onClick,
 }: {
-  active: boolean;
   step: RecipeStep;
+  label: string;
   onClick: () => void;
 }) {
   return (
     <button
-      className={cx(
-        "grid min-h-[92px] w-full cursor-pointer grid-cols-[48px_1fr] gap-3 rounded-[18px] p-3.5 text-left transition-[background,box-shadow,transform] duration-150 active:scale-[0.99]",
-        active
-          ? "bg-[#213229] text-[#fffaf0] shadow-[0_12px_28px_rgba(33,50,41,0.22)]"
-          : "bg-[#f2eadc] text-[#243229]",
-      )}
-      aria-current={active ? "step" : undefined}
+      className="grid min-h-[76px] w-full cursor-pointer grid-cols-[46px_1fr] gap-3 rounded-[16px] bg-[#f2eadc] p-3 text-left text-[#243229] transition-[background,transform] duration-150 active:scale-[0.99]"
       onClick={onClick}
     >
-      <span
-        className={cx(
-          "flex size-12 items-center justify-center rounded-[14px] text-[1.05rem] font-black",
-          active ? "bg-[#f6dfb4] text-[#243229]" : "bg-[#fffaf0] text-[#315342]",
-        )}
-      >
+      <span className="flex size-[46px] items-center justify-center rounded-[14px] bg-[#fffaf0] text-[1rem] font-bold text-[#315342]">
         {step.step_number}
       </span>
       <span className="min-w-0">
-        <span className="block [overflow-wrap:anywhere] text-[1.05rem] font-extrabold leading-[1.28]">
+        <span className="mb-1 block text-xs font-bold uppercase text-[#8a6139]">{label}</span>
+        <span className="block [overflow-wrap:anywhere] text-[1rem] font-semibold leading-[1.28]">
           {step.instruction}
         </span>
-        <span className="mt-2 flex flex-wrap gap-2">
-          {step.duration_minutes ? (
-            <span
-              className={cx(
-                "inline-flex min-h-8 items-center gap-1.5 rounded-full px-2.5 text-xs font-extrabold",
-                active ? "bg-[#f6dfb4] text-[#243229]" : "bg-[#fffaf0] text-[#5f6c62]",
-              )}
-            >
-              <Clock3 size={16} /> {step.timer_label ?? "Timer"} - {step.duration_minutes} min
-            </span>
-          ) : null}
-          {step.requires_attention ? (
-            <span
-              className={cx(
-                "inline-flex min-h-8 items-center gap-1.5 rounded-full px-2.5 text-xs font-extrabold",
-                active ? "bg-[#f6dfb4] text-[#243229]" : "bg-[#fffaf0] text-[#7b5632]",
-              )}
-            >
-              <Sparkles size={16} /> Keep close
-            </span>
-          ) : null}
-        </span>
+        <StepMeta step={step} />
       </span>
     </button>
+  );
+}
+
+function StepMeta({ step, active = false }: { step: RecipeStep; active?: boolean }) {
+  return (
+    <span className="mt-2 flex flex-wrap gap-2">
+      {step.duration_minutes ? (
+        <span
+          className={cx(
+            "inline-flex min-h-8 items-center gap-1.5 rounded-full px-2.5 text-xs font-bold",
+            active ? "bg-[#f6dfb4] text-[#243229]" : "bg-[#fffaf0] text-[#5f6c62]",
+          )}
+        >
+          <Clock3 size={16} /> {step.timer_label ?? "Timer"} - {step.duration_minutes} min
+        </span>
+      ) : null}
+      {step.requires_attention ? (
+        <span
+          className={cx(
+            "inline-flex min-h-8 items-center gap-1.5 rounded-full px-2.5 text-xs font-bold",
+            active ? "bg-[#f6dfb4] text-[#243229]" : "bg-[#fffaf0] text-[#9a4f2f]",
+          )}
+        >
+          <Sparkles size={16} /> Keep close
+        </span>
+      ) : null}
+    </span>
+  );
+}
+
+function StepControls({
+  currentStepIndex,
+  stepsLength,
+  onStepChange,
+}: {
+  currentStepIndex: number;
+  stepsLength: number;
+  onStepChange: (stepIndex: number) => void;
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-2.5">
+      <button
+        className="inline-flex min-h-14 cursor-pointer items-center justify-center gap-2 rounded-[16px] bg-[#efe4d2] px-4 font-bold text-[#243229] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+        disabled={currentStepIndex === 0}
+        onClick={() => onStepChange(Math.max(0, currentStepIndex - 1))}
+      >
+        <ChevronLeft size={22} />
+        Previous
+      </button>
+      <button
+        className="inline-flex min-h-14 cursor-pointer items-center justify-center gap-2 rounded-[16px] bg-[#2f6f58] px-4 font-bold text-[#fffdf8] shadow-[0_12px_22px_rgba(47,111,88,0.18)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+        disabled={currentStepIndex >= stepsLength - 1}
+        onClick={() => onStepChange(Math.min(stepsLength - 1, currentStepIndex + 1))}
+      >
+        Next
+        <ChevronRight size={22} />
+      </button>
+    </div>
   );
 }
 
@@ -132,9 +171,9 @@ function CookProgress({
 }) {
   return (
     <div className="mb-4">
-      <div className="mb-2 flex items-center justify-between text-sm font-extrabold text-[#5e6a60]">
+      <div className="mb-2 flex items-center justify-between text-sm font-bold text-[#5e6a60]">
         <span>{started ? "Cooking in progress" : "Ready to start"}</span>
-        <span>{Math.round(percentage)}%</span>
+        <span>{started ? `${Math.round(percentage)}%` : "0%"}</span>
       </div>
       <div className="h-3 overflow-hidden rounded-full bg-[#efe4d2]">
         <div
@@ -151,7 +190,7 @@ function StepTips({ tips }: { tips: string[] }) {
 
   return (
     <div className="mt-4 rounded-[18px] bg-[#eef3e9] p-4 text-[#243229]">
-      <div className="mb-2 flex items-center gap-2 font-black">
+      <div className="mb-2 flex items-center gap-2 font-bold">
         <Sparkles size={20} />
         <span>Tips</span>
       </div>

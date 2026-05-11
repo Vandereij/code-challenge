@@ -11,7 +11,13 @@ export default function App() {
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   return (
-    <CopilotKit runtimeUrl="/api/copilotkit" agent="recipe_agent" threadId={threadId}>
+    <CopilotKit
+      runtimeUrl="/api/copilotkit"
+      agent="recipe_agent"
+      threadId={threadId}
+      enableInspector={false}
+      showDevConsole={false}
+    >
       <main className="min-h-screen bg-[linear-gradient(135deg,#f6f2ea,#edf1e8)] p-3.5 text-[#17211b] md:p-6">
         <RecipeWorkspace
           key={threadId ?? "empty"}

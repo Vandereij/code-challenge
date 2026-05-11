@@ -41,23 +41,23 @@ export function IngredientsPanel({
     .filter((group) => group.ingredients.length > 0);
 
   return (
-    <section className="min-h-0 rounded-[20px] bg-[#fffaf0] p-[18px]" aria-labelledby="ingredients-title">
+    <section className="min-h-0 rounded-[20px] bg-[#fffaf0] p-4 md:p-[18px] xl:col-start-1 xl:row-start-1" aria-labelledby="ingredients-title">
       <div className="mb-4 flex items-center justify-between gap-[18px]">
-        <h2 className="mb-0 text-[1.3rem] font-bold" id="ingredients-title">
+        <h2 className="mb-0 text-[1.18rem] font-bold xl:text-[1.3rem]" id="ingredients-title">
           Ingredients
         </h2>
         <span className={countPillClass}>
           {checkedIngredients.length}/{ingredients.length}
         </span>
       </div>
-      <div className="grid max-h-[470px] gap-2.5 overflow-auto pr-1">
+      <div className="grid gap-2.5 pr-1">
         {groupedIngredients.map((group) => (
           <div key={group.category} className="grid gap-2">
             <div className="flex items-center justify-between gap-3 px-1 pt-1">
-              <h3 className="mb-0 text-[0.9rem] font-black uppercase tracking-normal text-[#6d5c43]">
+              <h3 className="mb-0 text-[0.86rem] font-bold uppercase tracking-normal text-[#6d5c43]">
                 {ingredientCategoryLabels[group.category]}
               </h3>
-              <span className="text-sm font-extrabold text-[#697265]">{group.ingredients.length}</span>
+              <span className="text-sm font-bold text-[#697265]">{group.ingredients.length}</span>
             </div>
             {group.ingredients.map((ingredient) => (
               <IngredientRow
@@ -87,12 +87,12 @@ function IngredientRow({
   return (
     <button
       className={cx(
-        "grid min-h-[72px] w-full cursor-pointer grid-cols-[48px_1fr] gap-3 rounded-2xl p-2.5 text-left text-[#243229] transition-[background,transform] duration-150 active:scale-[0.98]",
+        "grid min-h-[70px] w-full cursor-pointer grid-cols-[42px_1fr] gap-2.5 rounded-[16px] p-2.5 text-left text-[#243229] transition-[background,transform] duration-150 active:scale-[0.98] xl:grid-cols-[48px_1fr] xl:gap-3",
         checked ? "bg-[#dce9d7]" : "bg-[#f2eadc]",
       )}
       onClick={onToggle}
     >
-      <span className="flex size-12 items-center justify-center rounded-[14px] border-2 border-[#8aa081] text-[0.88rem] font-black text-[#315342]">
+      <span className="flex size-[42px] items-center justify-center rounded-[14px] border-2 border-[#8aa081] text-[0.88rem] font-bold text-[#315342] xl:size-12">
         {checked ? <Check size={24} strokeWidth={3} /> : null}
       </span>
       <span className="flex min-w-0 flex-col justify-center">
@@ -105,7 +105,7 @@ function IngredientRow({
             {ingredient.substitutes.slice(0, 3).map((substitute) => (
               <span
                 key={substitute}
-                className="inline-flex min-h-7 items-center rounded-full bg-[#fffaf0] px-2 text-xs font-extrabold text-[#7b5632]"
+                className="inline-flex min-h-7 items-center rounded-full bg-[#fffaf0] px-2 text-xs font-semibold text-[#7b5632]"
               >
                 {substitute}
               </span>

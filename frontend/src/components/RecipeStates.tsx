@@ -2,11 +2,11 @@ import { ChefHat, FileText } from "lucide-react";
 
 export function EmptyRecipeState() {
   return (
-    <div className="grid min-h-[430px] place-items-center content-center rounded-[20px] bg-[#fffaf0] p-8 text-center text-[#34453a]">
+    <div className="grid min-h-[430px] place-items-center content-center rounded-[20px] border-2 border-dashed border-[#c7b995] bg-[#fffaf0] p-8 text-center text-[#34453a]">
       <FileText size={56} />
       <h2 className="mb-0 text-[1.3rem] font-bold">Upload a PDF or text recipe</h2>
       <p className="mb-0 max-w-[420px] text-[1.08rem] leading-[1.45] text-[#5e6a60]">
-        The recipe will appear here with ingredients, timings, servings, and a big-step cook mode for tablet use.
+        Drop in a PDF or text file under 10 MB. Ingredients, timing, servings, and cook mode will appear here.
       </p>
     </div>
   );
@@ -33,7 +33,7 @@ export function ParsingState() {
 
 export function ChatLoadingState() {
   return (
-    <div className="grid min-h-0 flex-1 place-items-center px-[22px] pb-[22px] text-center font-extrabold text-[#5e6a60]">
+    <div className="grid min-h-0 flex-1 place-items-center px-[22px] pb-[22px] text-center font-semibold text-[#5e6a60]">
       Loading chat
     </div>
   );

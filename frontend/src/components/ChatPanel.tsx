@@ -1,5 +1,4 @@
 import { Suspense, lazy, useEffect, useState } from "react";
-import { ListChecks, Mic, Users } from "lucide-react";
 import type { Recipe } from "../lib/types";
 import { ChatLoadingState } from "./RecipeStates";
 import { countPillClass, cx, eyebrowClass, panelFrame } from "./shared";
@@ -15,31 +14,27 @@ interface ChatPanelProps {
 
 export function ChatPanel({ recipe, threadId }: ChatPanelProps) {
   const chatReady = useIdleReady();
+  const suggestions = recipe
+    ? [
+        { title: "Scale servings", message: `Scale ${recipe.title} to 2 servings.` },
+        { title: "Next step", message: "Move me to the next cooking step." },
+      ]
+    : [{ title: "After upload", message: "What can you help me change in this recipe?" }];
 
   return (
-    <aside className={cx(panelFrame, "flex min-h-[560px] flex-col rounded-[22px]")}>
-      <div className="flex flex-col gap-3 px-[22px] pt-[22px] pb-3 sm:flex-row sm:items-center sm:justify-between">
+    <aside className={cx(panelFrame, "flex min-h-[460px] flex-col rounded-[22px] lg:min-h-0")}>
+      <div className="flex flex-col gap-3 px-5 pt-5 pb-3 sm:flex-row sm:items-center sm:justify-between lg:flex-col lg:items-start">
         <div>
           <p className={eyebrowClass}>Live Agent</p>
-          <h2 className="mb-0 text-[1.3rem] font-bold">Ask while you cook</h2>
+          <h2 className="mb-0 text-[1.2rem] font-bold leading-[1.2]">Ask while you cook</h2>
         </div>
         <div className={countPillClass}>{threadId ? "Ready" : "Waiting"}</div>
-      </div>
-      <div className="flex flex-wrap gap-2 px-[22px] pb-3">
-        <span className="inline-flex min-h-9 items-center gap-2 rounded-full bg-[#f4e0bf] px-2.5 text-[0.86rem] font-extrabold text-[#7b5632]">
-          <Users size={18} /> Scale servings
-        </span>
-        <span className="inline-flex min-h-9 items-center gap-2 rounded-full bg-[#f4e0bf] px-2.5 text-[0.86rem] font-extrabold text-[#7b5632]">
-          <ListChecks size={18} /> Next step
-        </span>
-        <span className="inline-flex min-h-9 items-center gap-2 rounded-full bg-[#f4e0bf] px-2.5 text-[0.86rem] font-extrabold text-[#7b5632]">
-          <Mic size={18} /> Voice soon
-        </span>
       </div>
       {chatReady ? (
         <Suspense fallback={<ChatLoadingState />}>
           <CopilotChat
             className="chat-box min-h-0 flex-1"
+            suggestions={suggestions}
             labels={{
               initial: recipe
                 ? "I can scale servings, swap ingredients, or guide the next step."

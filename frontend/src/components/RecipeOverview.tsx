@@ -13,20 +13,20 @@ export function RecipeOverview({ recipeState, totalMinutes }: RecipeOverviewProp
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
         <SummaryPill icon={<Users size={24} />} label="Servings" value={`${recipe.servings}`} />
         <SummaryPill icon={<Clock3 size={24} />} label="Time" value={totalMinutes ? `${totalMinutes} min` : "Ready"} />
         <SummaryPill icon={<Flame size={24} />} label="Difficulty" value={recipe.difficulty} />
         <SummaryPill icon={<ChefHat size={24} />} label="Cuisine" value={recipe.cuisine ?? "Home"} />
       </div>
 
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.72fr)]">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.48fr)]">
         <RecipeMetaPanel recipeState={recipeState} totalMinutes={totalMinutes} />
         <DietaryTags tags={recipe.dietary_tags} />
       </div>
 
       {recipe.description ? (
-        <p className="mb-0 max-w-[66ch] text-[1.1rem] leading-[1.45] text-[#465347]">
+        <p className="mb-0 max-w-[70ch] text-[1.02rem] leading-[1.45] text-[#465347] md:text-[1.08rem]">
           {recipe.description}
         </p>
       ) : null}
@@ -46,29 +46,24 @@ function RecipeMetaPanel({
 
   const visibleServings = recipeState.scaled_servings ?? recipe.servings;
   const originalServings = recipe.original_servings;
-  const timeRows = [
-    { label: "Prep", value: recipe.prep_time_minutes ? `${recipe.prep_time_minutes} min` : "Flexible" },
-    { label: "Cook", value: recipe.cook_time_minutes ? `${recipe.cook_time_minutes} min` : "Flexible" },
-    { label: "Total", value: totalMinutes ? `${totalMinutes} min` : "Ready" },
-  ];
+  const timeSummary = [
+    totalMinutes ? `${totalMinutes} min total` : "Ready when you are",
+    recipe.prep_time_minutes ? `${recipe.prep_time_minutes} prep` : null,
+    recipe.cook_time_minutes ? `${recipe.cook_time_minutes} cook` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
-    <div className="grid gap-3 rounded-[20px] bg-[#fffaf0] p-4 sm:grid-cols-[minmax(0,1fr)_minmax(170px,0.7fr)]">
-      <div>
+    <div className="grid gap-3 rounded-[20px] bg-[#fffaf0] p-4 sm:grid-cols-[minmax(0,1fr)_minmax(150px,0.45fr)]">
+      <div className="flex min-h-[86px] flex-col justify-center rounded-[16px] border border-[#20302714] px-4 py-3">
         <p className={eyebrowClass}>Timing</p>
-        <div className="grid grid-cols-3 gap-2">
-          {timeRows.map((row) => (
-            <div key={row.label} className="rounded-2xl bg-[#f2eadc] p-3">
-              <span className="block text-[0.78rem] font-bold text-[#6f6759]">{row.label}</span>
-              <strong className="mt-1 block text-[1rem] text-[#243229]">{row.value}</strong>
-            </div>
-          ))}
-        </div>
+        <strong className="text-[1.05rem] font-semibold leading-[1.35] text-[#243229]">{timeSummary}</strong>
       </div>
-      <div className="rounded-2xl bg-[#e4ecdf] p-3 text-[#243229]">
+      <div className="rounded-[16px] bg-[#e4ecdf] p-3 text-[#243229]">
         <p className={cx(eyebrowClass, "mb-1 text-[#53614f]")}>Servings</p>
-        <strong className="block text-[2.1rem] leading-none">{visibleServings}</strong>
-        <span className="mt-1 block text-sm font-extrabold text-[#5e6a60]">
+        <strong className="block text-[2rem] leading-none">{visibleServings}</strong>
+        <span className="mt-1 block text-sm font-semibold text-[#5e6a60]">
           {originalServings && originalServings !== visibleServings
             ? `Original ${originalServings}`
             : "Current recipe"}
@@ -83,7 +78,7 @@ function DietaryTags({ tags }: { tags: string[] }) {
     return (
       <div className="flex min-h-[114px] items-center gap-3 rounded-[20px] bg-[#fffaf0] p-4 text-[#5e6a60]">
         <Tags size={24} />
-        <span className="font-extrabold">No dietary tags found</span>
+        <span className="font-semibold">No dietary tags found</span>
       </div>
     );
   }
@@ -95,7 +90,7 @@ function DietaryTags({ tags }: { tags: string[] }) {
         {tags.map((tag) => (
           <span
             key={tag}
-            className="inline-flex min-h-10 items-center rounded-full bg-[#f4e0bf] px-3 text-sm font-extrabold capitalize text-[#7b5632]"
+            className="inline-flex min-h-9 items-center rounded-full bg-[#f4e0bf] px-3 text-sm font-semibold capitalize text-[#7b5632]"
           >
             {tag}
           </span>

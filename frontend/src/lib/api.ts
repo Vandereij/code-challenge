@@ -1,16 +1,24 @@
 import type { UploadResponse } from "./types";
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL ?? "http://localhost:8000";
+const backendUrl = import.meta.env.VITE_BACKEND_URL ?? "/api";
 
 export async function uploadRecipe(file: File, options?: { signal?: AbortSignal }): Promise<UploadResponse> {
   const form = new FormData();
   form.append("file", file);
 
-  const response = await fetch(`${backendUrl}/upload`, {
-    method: "POST",
-    body: form,
-    signal: options?.signal,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${backendUrl}/upload`, {
+      method: "POST",
+      body: form,
+      signal: options?.signal,
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw error;
+    }
+    throw new Error("Could not reach the recipe parser. Make sure the backend is running on port 8000.");
+  }
 
   if (!response.ok) {
     const detail = await readError(response);

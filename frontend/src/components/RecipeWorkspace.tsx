@@ -77,12 +77,19 @@ export function RecipeWorkspace({
   };
 
   return (
-    <div className="mx-auto grid min-h-[calc(100vh-28px)] max-w-[1180px] grid-cols-1 gap-5 md:min-h-[calc(100vh-48px)] lg:grid-cols-[minmax(0,1.8fr)_minmax(330px,0.9fr)]">
-      <section className={cx(panelFrame, "flex flex-col gap-5 rounded-[22px] p-5 md:p-6")}>
+    <div
+      className={cx(
+        "mx-auto grid min-h-[calc(100vh-28px)] max-w-[1220px] grid-cols-1 gap-4 md:min-h-[calc(100vh-48px)] xl:gap-5",
+        recipe
+          ? "lg:grid-cols-[minmax(0,1fr)_minmax(240px,0.26fr)] xl:grid-cols-[minmax(0,1fr)_minmax(260px,0.26fr)]"
+          : "lg:grid-cols-[minmax(0,1.8fr)_minmax(330px,0.9fr)]",
+      )}
+    >
+      <section className={cx(panelFrame, "flex min-w-0 flex-col gap-4 rounded-[22px] p-4 md:p-5 xl:p-6")}>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
+          <div className="min-w-0">
             <p className={eyebrowClass}>Kitchen Companion</p>
-            <h1 className="mb-0 text-[clamp(2rem,4vw,3.4rem)] leading-[1.02] tracking-normal">
+            <h1 className="mb-0 [overflow-wrap:anywhere] text-[clamp(1.9rem,3vw,2.75rem)] leading-[1.06] tracking-normal">
               {recipe?.title ?? "Drop in a recipe"}
             </h1>
           </div>
@@ -111,18 +118,18 @@ export function RecipeWorkspace({
           <>
             <RecipeOverview recipeState={recipeState} totalMinutes={totalMinutes} />
 
-            <div className="grid min-h-0 flex-1 grid-cols-1 gap-[18px] xl:grid-cols-[minmax(260px,0.85fr)_minmax(0,1.15fr)]">
-              <IngredientsPanel
-                ingredients={recipe.ingredients}
-                checkedIngredients={recipeState.checked_ingredients}
-                checkedIngredientSet={checkedIngredientSet}
-                onToggleIngredient={toggleIngredient}
-              />
+            <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 xl:grid-cols-[minmax(230px,0.34fr)_minmax(0,1fr)]">
               <CookModePanel
                 currentStepIndex={recipeState.current_step}
                 cookingStarted={recipeState.cooking_started}
                 steps={recipe.steps}
                 onStepChange={updateStep}
+              />
+              <IngredientsPanel
+                ingredients={recipe.ingredients}
+                checkedIngredients={recipeState.checked_ingredients}
+                checkedIngredientSet={checkedIngredientSet}
+                onToggleIngredient={toggleIngredient}
               />
             </div>
           </>
