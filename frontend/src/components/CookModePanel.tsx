@@ -15,7 +15,11 @@ export function CookModePanel({
   steps,
   onStepChange,
 }: CookModePanelProps) {
-  const progressPercentage = cookingStarted && steps.length ? ((currentStepIndex + 1) / steps.length) * 100 : 0;
+  const progressPercentage = getStepProgressPercentage({
+    currentStepIndex,
+    cookingStarted,
+    stepsLength: steps.length,
+  });
   const currentStep = steps[currentStepIndex];
   const nextSteps = steps.filter((_, index) => index !== currentStepIndex).slice(0, 2);
 
@@ -58,6 +62,19 @@ export function CookModePanel({
       <StepTips tips={currentStep?.tips ?? []} />
     </section>
   );
+}
+
+function getStepProgressPercentage({
+  currentStepIndex,
+  cookingStarted,
+  stepsLength,
+}: {
+  currentStepIndex: number;
+  cookingStarted: boolean;
+  stepsLength: number;
+}) {
+  if (!cookingStarted || stepsLength <= 1) return 0;
+  return (currentStepIndex / (stepsLength - 1)) * 100;
 }
 
 function CurrentStepCard({ step }: { step: RecipeStep }) {
