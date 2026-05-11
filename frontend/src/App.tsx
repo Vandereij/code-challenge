@@ -4,20 +4,21 @@ import { CopilotKit, useCoAgent } from "@copilotkit/react-core";
 import {
   Check,
   ChefHat,
+  ChevronLeft,
+  ChevronRight,
   CircleAlert,
   Clock3,
   FileText,
   Flame,
   ListChecks,
   Mic,
-  Minus,
-  Plus,
   Sparkles,
+  Tags,
   Upload,
   Users,
 } from "lucide-react";
 import { uploadRecipe } from "./lib/api";
-import type { Ingredient, RecipeContext, UploadResponse } from "./lib/types";
+import type { Ingredient, IngredientCategory, RecipeContext, UploadResponse } from "./lib/types";
 import { EMPTY_RECIPE_CONTEXT } from "./lib/types";
 
 const CopilotChat = lazy(() =>
@@ -34,6 +35,23 @@ const countPillClass =
 
 const maxUploadBytes = 10 * 1024 * 1024;
 const acceptedUploadTypes = new Set(["application/pdf", "text/plain"]);
+const ingredientCategoryOrder: IngredientCategory[] = [
+  "produce",
+  "protein",
+  "dairy",
+  "pantry",
+  "spice",
+  "other",
+];
+
+const ingredientCategoryLabels: Record<IngredientCategory, string> = {
+  produce: "Produce",
+  protein: "Protein",
+  dairy: "Dairy",
+  pantry: "Pantry",
+  spice: "Spices",
+  other: "Other",
+};
 
 function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -147,6 +165,21 @@ function RecipeWorkspace({
     return total || null;
   }, [recipe]);
 
+  const groupedIngredients = useMemo(() => {
+    if (!recipe) return [];
+    return ingredientCategoryOrder
+      .map((category) => ({
+        category,
+        ingredients: recipe.ingredients.filter((ingredient) => ingredient.category === category),
+      }))
+      .filter((group) => group.ingredients.length > 0);
+  }, [recipe]);
+
+  const currentStep = recipe?.steps[recipeState.current_step];
+  const progressPercentage = recipe?.steps.length
+    ? ((recipeState.current_step + 1) / recipe.steps.length) * 100
+    : 0;
+
   const patchRecipeState = (patch: Partial<RecipeContext>) => {
     setState((previousState) => ({
       ...(previousState ?? recipeState),
@@ -215,6 +248,11 @@ function RecipeWorkspace({
               <SummaryPill icon={<ChefHat size={24} />} label="Cuisine" value={recipe.cuisine ?? "Home"} />
             </div>
 
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.72fr)]">
+              <RecipeMetaPanel recipeState={recipeState} totalMinutes={totalMinutes} />
+              <DietaryTags tags={recipe.dietary_tags} />
+            </div>
+
             {recipe.description ? (
               <p className="mb-0 max-w-[66ch] text-[1.1rem] leading-[1.45] text-[#465347]">
                 {recipe.description}
@@ -230,13 +268,23 @@ function RecipeWorkspace({
                   <span className={countPillClass}>{recipeState.checked_ingredients.length}/{recipe.ingredients.length}</span>
                 </div>
                 <div className="grid max-h-[470px] gap-2.5 overflow-auto pr-1">
-                  {recipe.ingredients.map((ingredient) => (
-                    <IngredientRow
-                      key={ingredient.name}
-                      ingredient={ingredient}
-                      checked={checkedIngredientSet.has(ingredient.name)}
-                      onToggle={() => toggleIngredient(ingredient.name)}
-                    />
+                  {groupedIngredients.map((group) => (
+                    <div key={group.category} className="grid gap-2">
+                      <div className="flex items-center justify-between gap-3 px-1 pt-1">
+                        <h3 className="mb-0 text-[0.9rem] font-black uppercase tracking-normal text-[#6d5c43]">
+                          {ingredientCategoryLabels[group.category]}
+                        </h3>
+                        <span className="text-sm font-extrabold text-[#697265]">{group.ingredients.length}</span>
+                      </div>
+                      {group.ingredients.map((ingredient) => (
+                        <IngredientRow
+                          key={ingredient.name}
+                          ingredient={ingredient}
+                          checked={checkedIngredientSet.has(ingredient.name)}
+                          onToggle={() => toggleIngredient(ingredient.name)}
+                        />
+                      ))}
+                    </div>
                   ))}
                 </div>
               </section>
@@ -248,60 +296,89 @@ function RecipeWorkspace({
                   </h2>
                   <span className={countPillClass}>Step {recipeState.current_step + 1}/{recipe.steps.length}</span>
                 </div>
-                <div className="grid min-h-[300px] gap-[18px] rounded-[20px] bg-[#213229] p-[22px] text-[#fffaf0]">
-                  <div className="flex items-center justify-between gap-3.5">
+                <CookProgress percentage={progressPercentage} started={recipeState.cooking_started} />
+                <div className="grid gap-3">
+                  <div className="grid max-h-[390px] gap-2.5 overflow-auto pr-1">
+                    {recipe.steps.map((step, index) => {
+                      const active = index === recipeState.current_step;
+
+                      return (
+                        <button
+                          key={step.step_number}
+                          className={cx(
+                            "grid min-h-[92px] w-full cursor-pointer grid-cols-[48px_1fr] gap-3 rounded-[18px] p-3.5 text-left transition-[background,box-shadow,transform] duration-150 active:scale-[0.99]",
+                            active
+                              ? "bg-[#213229] text-[#fffaf0] shadow-[0_12px_28px_rgba(33,50,41,0.22)]"
+                              : "bg-[#f2eadc] text-[#243229]",
+                          )}
+                          aria-current={active ? "step" : undefined}
+                          onClick={() => updateStep(index)}
+                        >
+                          <span
+                            className={cx(
+                              "flex size-12 items-center justify-center rounded-[14px] text-[1.05rem] font-black",
+                              active ? "bg-[#f6dfb4] text-[#243229]" : "bg-[#fffaf0] text-[#315342]",
+                            )}
+                          >
+                            {step.step_number}
+                          </span>
+                          <span className="min-w-0">
+                            <span className="block [overflow-wrap:anywhere] text-[1.05rem] font-extrabold leading-[1.28]">
+                              {step.instruction}
+                            </span>
+                            <span className="mt-2 flex flex-wrap gap-2">
+                              {step.duration_minutes ? (
+                                <span
+                                  className={cx(
+                                    "inline-flex min-h-8 items-center gap-1.5 rounded-full px-2.5 text-xs font-extrabold",
+                                    active
+                                      ? "bg-[#f6dfb4] text-[#243229]"
+                                      : "bg-[#fffaf0] text-[#5f6c62]",
+                                  )}
+                                >
+                                  <Clock3 size={16} /> {step.timer_label ?? "Timer"} - {step.duration_minutes} min
+                                </span>
+                              ) : null}
+                              {step.requires_attention ? (
+                                <span
+                                  className={cx(
+                                    "inline-flex min-h-8 items-center gap-1.5 rounded-full px-2.5 text-xs font-extrabold",
+                                    active
+                                      ? "bg-[#f6dfb4] text-[#243229]"
+                                      : "bg-[#fffaf0] text-[#7b5632]",
+                                  )}
+                                >
+                                  <Sparkles size={16} /> Keep close
+                                </span>
+                              ) : null}
+                            </span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2.5">
                     <button
-                      className="inline-flex size-[68px] cursor-pointer items-center justify-center rounded-[20px] bg-[#fffaf0] text-[#213229] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-35"
-                      aria-label="Previous step"
+                      className="inline-flex min-h-14 cursor-pointer items-center justify-center gap-2 rounded-[16px] bg-[#efe4d2] px-4 font-black text-[#243229] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                       disabled={recipeState.current_step === 0}
                       onClick={() => updateStep(Math.max(0, recipeState.current_step - 1))}
                     >
-                      <Minus size={28} />
+                      <ChevronLeft size={22} />
+                      Previous
                     </button>
-                    <strong className="text-[3.4rem] leading-none">{recipeState.current_step + 1}</strong>
                     <button
-                      className="inline-flex size-[68px] cursor-pointer items-center justify-center rounded-[20px] bg-[#fffaf0] text-[#213229] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-35"
-                      aria-label="Next step"
+                      className="inline-flex min-h-14 cursor-pointer items-center justify-center gap-2 rounded-[16px] bg-[#2f6f58] px-4 font-black text-[#fffdf8] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                       disabled={recipeState.current_step >= recipe.steps.length - 1}
                       onClick={() =>
                         updateStep(Math.min(recipe.steps.length - 1, recipeState.current_step + 1))
                       }
                     >
-                      <Plus size={28} />
+                      Next
+                      <ChevronRight size={22} />
                     </button>
                   </div>
-                  <p className="mb-0 text-[clamp(1.45rem,3vw,2.25rem)] leading-[1.22]">
-                    {recipe.steps[recipeState.current_step]?.instruction}
-                  </p>
-                  <div className="self-end flex flex-wrap gap-2.5">
-                    {recipe.steps[recipeState.current_step]?.duration_minutes ? (
-                      <span className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[#f6dfb4] px-3 font-extrabold text-[#243229]">
-                        <Clock3 size={20} /> {recipe.steps[recipeState.current_step].duration_minutes} min
-                      </span>
-                    ) : null}
-                    {recipe.steps[recipeState.current_step]?.requires_attention ? (
-                      <span className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[#f6dfb4] px-3 font-extrabold text-[#243229]">
-                        <Sparkles size={20} /> Keep close
-                      </span>
-                    ) : null}
-                  </div>
                 </div>
-                <div className="mt-4 flex flex-wrap gap-2.5">
-                  {recipe.steps.map((step, index) => (
-                    <button
-                      key={step.step_number}
-                      className={cx(
-                        "size-[52px] cursor-pointer rounded-[15px] font-black active:scale-[0.98]",
-                        index === recipeState.current_step
-                          ? "bg-[#b65f36] text-[#fffaf0]"
-                          : "bg-[#efe4d2] text-[#213229]",
-                      )}
-                      onClick={() => updateStep(index)}
-                    >
-                      {step.step_number}
-                    </button>
-                  ))}
-                </div>
+                <StepTips tips={currentStep?.tips ?? []} />
               </section>
             </div>
           </>
@@ -440,6 +517,118 @@ function SummaryPill({
   );
 }
 
+function RecipeMetaPanel({
+  recipeState,
+  totalMinutes,
+}: {
+  recipeState: RecipeContext;
+  totalMinutes: number | null;
+}) {
+  const recipe = recipeState.recipe;
+  if (!recipe) return null;
+
+  const visibleServings = recipeState.scaled_servings ?? recipe.servings;
+  const originalServings = recipe.original_servings;
+  const timeRows = [
+    { label: "Prep", value: recipe.prep_time_minutes ? `${recipe.prep_time_minutes} min` : "Flexible" },
+    { label: "Cook", value: recipe.cook_time_minutes ? `${recipe.cook_time_minutes} min` : "Flexible" },
+    { label: "Total", value: totalMinutes ? `${totalMinutes} min` : "Ready" },
+  ];
+
+  return (
+    <div className="grid gap-3 rounded-[20px] bg-[#fffaf0] p-4 sm:grid-cols-[minmax(0,1fr)_minmax(170px,0.7fr)]">
+      <div>
+        <p className={eyebrowClass}>Timing</p>
+        <div className="grid grid-cols-3 gap-2">
+          {timeRows.map((row) => (
+            <div key={row.label} className="rounded-2xl bg-[#f2eadc] p-3">
+              <span className="block text-[0.78rem] font-bold text-[#6f6759]">{row.label}</span>
+              <strong className="mt-1 block text-[1rem] text-[#243229]">{row.value}</strong>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="rounded-2xl bg-[#e4ecdf] p-3 text-[#243229]">
+        <p className={cx(eyebrowClass, "mb-1 text-[#53614f]")}>Servings</p>
+        <strong className="block text-[2.1rem] leading-none">{visibleServings}</strong>
+        <span className="mt-1 block text-sm font-extrabold text-[#5e6a60]">
+          {originalServings && originalServings !== visibleServings
+            ? `Original ${originalServings}`
+            : "Current recipe"}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function DietaryTags({ tags }: { tags: string[] }) {
+  if (tags.length === 0) {
+    return (
+      <div className="flex min-h-[114px] items-center gap-3 rounded-[20px] bg-[#fffaf0] p-4 text-[#5e6a60]">
+        <Tags size={24} />
+        <span className="font-extrabold">No dietary tags found</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-[20px] bg-[#fffaf0] p-4">
+      <p className={eyebrowClass}>Dietary</p>
+      <div className="flex flex-wrap gap-2">
+        {tags.map((tag) => (
+          <span
+            key={tag}
+            className="inline-flex min-h-10 items-center rounded-full bg-[#f4e0bf] px-3 text-sm font-extrabold capitalize text-[#7b5632]"
+          >
+            {tag}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CookProgress({
+  percentage,
+  started,
+}: {
+  percentage: number;
+  started: boolean;
+}) {
+  return (
+    <div className="mb-4">
+      <div className="mb-2 flex items-center justify-between text-sm font-extrabold text-[#5e6a60]">
+        <span>{started ? "Cooking in progress" : "Ready to start"}</span>
+        <span>{Math.round(percentage)}%</span>
+      </div>
+      <div className="h-3 overflow-hidden rounded-full bg-[#efe4d2]">
+        <div
+          className="h-full rounded-full bg-[#2f6f58] transition-[width] duration-300"
+          style={{ width: `${percentage}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function StepTips({ tips }: { tips: string[] }) {
+  if (tips.length === 0) return null;
+
+  return (
+    <div className="mt-4 rounded-[18px] bg-[#eef3e9] p-4 text-[#243229]">
+      <div className="mb-2 flex items-center gap-2 font-black">
+        <Sparkles size={20} />
+        <span>Tips</span>
+      </div>
+      <ul className="m-0 grid gap-2 pl-5 text-[0.98rem] leading-[1.35] text-[#465347]">
+        {tips.map((tip) => (
+          <li key={tip}>{tip}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function IngredientRow({
   ingredient,
   checked,
@@ -466,6 +655,18 @@ function IngredientRow({
         <small className="mt-1 [overflow-wrap:anywhere] text-sm text-[#6f6759]">
           {[quantity, ingredient.preparation].filter(Boolean).join(", ") || ingredient.category}
         </small>
+        {ingredient.substitutes.length > 0 ? (
+          <span className="mt-2 flex flex-wrap gap-1.5">
+            {ingredient.substitutes.slice(0, 3).map((substitute) => (
+              <span
+                key={substitute}
+                className="inline-flex min-h-7 items-center rounded-full bg-[#fffaf0] px-2 text-xs font-extrabold text-[#7b5632]"
+              >
+                {substitute}
+              </span>
+            ))}
+          </span>
+        ) : null}
       </span>
     </button>
   );
