@@ -1,7 +1,6 @@
-import { useMemo, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { CopilotKit, useCoAgent } from "@copilotkit/react-core";
-import { CopilotChat } from "@copilotkit/react-ui";
 import {
   Check,
   ChefHat,
@@ -21,6 +20,10 @@ import { uploadRecipe } from "./lib/api";
 import type { Ingredient, RecipeContext, UploadResponse } from "./lib/types";
 import { EMPTY_RECIPE_CONTEXT } from "./lib/types";
 
+const CopilotChat = lazy(() =>
+  import("@copilotkit/react-ui").then((module) => ({ default: module.CopilotChat })),
+);
+
 const panelFrame =
   "min-w-0 overflow-hidden border border-[#20302724] bg-[#fffcf5]/95 shadow-[0_24px_80px_rgba(68,55,40,0.12)]";
 
@@ -29,8 +32,46 @@ const eyebrowClass = "mb-1.5 text-[0.84rem] font-extrabold uppercase tracking-no
 const countPillClass =
   "inline-flex min-h-10 items-center justify-center rounded-full bg-[#e4ecdf] px-3.5 font-extrabold text-[#315342]";
 
+const maxUploadBytes = 10 * 1024 * 1024;
+const acceptedUploadTypes = new Set(["application/pdf", "text/plain"]);
+
 function cx(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
+}
+
+function validateRecipeFile(file: File): string | null {
+  if (file.size > maxUploadBytes) {
+    return "Please upload a recipe smaller than 10 MB.";
+  }
+
+  const lowerName = file.name.toLowerCase();
+  const hasAcceptedExtension = lowerName.endsWith(".pdf") || lowerName.endsWith(".txt");
+  const hasAcceptedType = acceptedUploadTypes.has(file.type);
+  const hasGenericType = file.type === "" || file.type === "application/octet-stream";
+
+  if (!hasAcceptedType && !(hasGenericType && hasAcceptedExtension)) {
+    return "Please upload a PDF or plain text recipe.";
+  }
+
+  return null;
+}
+
+function useIdleReady() {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const markReady = () => setReady(true);
+
+    if ("requestIdleCallback" in window) {
+      const idleId = window.requestIdleCallback(markReady, { timeout: 1200 });
+      return () => window.cancelIdleCallback(idleId);
+    }
+
+    const timeoutId = globalThis.setTimeout(markReady, 300);
+    return () => globalThis.clearTimeout(timeoutId);
+  }, []);
+
+  return ready;
 }
 
 export default function App() {
@@ -93,6 +134,12 @@ function RecipeWorkspace({
 
   const recipeState = state ?? initialState;
   const recipe = recipeState.recipe;
+  const chatReady = useIdleReady();
+
+  const checkedIngredientSet = useMemo(
+    () => new Set(recipeState.checked_ingredients),
+    [recipeState.checked_ingredients],
+  );
 
   const totalMinutes = useMemo(() => {
     if (!recipe) return null;
@@ -100,22 +147,31 @@ function RecipeWorkspace({
     return total || null;
   }, [recipe]);
 
+  const patchRecipeState = (patch: Partial<RecipeContext>) => {
+    setState((previousState) => ({
+      ...(previousState ?? recipeState),
+      ...patch,
+    }));
+  };
+
   const updateStep = (current_step: number) => {
-    setState({
-      ...recipeState,
+    patchRecipeState({
       current_step,
       cooking_started: true,
     });
   };
 
   const toggleIngredient = (name: string) => {
-    const checked = recipeState.checked_ingredients.includes(name)
-      ? recipeState.checked_ingredients.filter((item) => item !== name)
-      : [...recipeState.checked_ingredients, name];
+    setState((previousState) => {
+      const nextState = previousState ?? recipeState;
+      const checked = nextState.checked_ingredients.includes(name)
+        ? nextState.checked_ingredients.filter((item) => item !== name)
+        : [...nextState.checked_ingredients, name];
 
-    setState({
-      ...recipeState,
-      checked_ingredients: checked,
+      return {
+        ...nextState,
+        checked_ingredients: checked,
+      };
     });
   };
 
@@ -178,7 +234,7 @@ function RecipeWorkspace({
                     <IngredientRow
                       key={ingredient.name}
                       ingredient={ingredient}
-                      checked={recipeState.checked_ingredients.includes(ingredient.name)}
+                      checked={checkedIngredientSet.has(ingredient.name)}
                       onToggle={() => toggleIngredient(ingredient.name)}
                     />
                   ))}
@@ -265,15 +321,21 @@ function RecipeWorkspace({
           <span className="inline-flex min-h-9 items-center gap-2 rounded-full bg-[#f4e0bf] px-2.5 text-[0.86rem] font-extrabold text-[#7b5632]"><ListChecks size={18} /> Next step</span>
           <span className="inline-flex min-h-9 items-center gap-2 rounded-full bg-[#f4e0bf] px-2.5 text-[0.86rem] font-extrabold text-[#7b5632]"><Mic size={18} /> Voice soon</span>
         </div>
-        <CopilotChat
-          className="chat-box min-h-0 flex-1"
-          labels={{
-            initial: recipe
-              ? "I can scale servings, swap ingredients, or guide the next step."
-              : "Upload a recipe first, then I can help you cook it.",
-            title: "Cooking Copilot",
-          }}
-        />
+        {chatReady ? (
+          <Suspense fallback={<ChatLoadingState />}>
+            <CopilotChat
+              className="chat-box min-h-0 flex-1"
+              labels={{
+                initial: recipe
+                  ? "I can scale servings, swap ingredients, or guide the next step."
+                  : "Upload a recipe first, then I can help you cook it.",
+                title: "Cooking Copilot",
+              }}
+            />
+          </Suspense>
+        ) : (
+          <ChatLoadingState />
+        )}
       </aside>
     </div>
   );
@@ -292,15 +354,46 @@ function UploadButton({
   onUploadComplete,
   onUploadError,
 }: UploadButtonProps) {
+  const activeUploadRef = useRef<AbortController | null>(null);
+  const uploadIdRef = useRef(0);
+
+  useEffect(() => {
+    return () => {
+      activeUploadRef.current?.abort();
+    };
+  }, []);
+
   const handleFile = async (file?: File) => {
     if (!file) return;
+
+    const validationError = validateRecipeFile(file);
+    if (validationError) {
+      onUploadError(validationError);
+      return;
+    }
+
+    activeUploadRef.current?.abort();
+    const uploadId = uploadIdRef.current + 1;
+    uploadIdRef.current = uploadId;
+    const controller = new AbortController();
+    activeUploadRef.current = controller;
+
     onUploadStart();
 
     try {
-      const response = await uploadRecipe(file);
-      onUploadComplete(response);
+      const response = await uploadRecipe(file, { signal: controller.signal });
+      if (uploadIdRef.current === uploadId) {
+        onUploadComplete(response);
+      }
     } catch (error) {
-      onUploadError(error instanceof Error ? error.message : "The recipe could not be uploaded.");
+      if (controller.signal.aborted) return;
+      if (uploadIdRef.current === uploadId) {
+        onUploadError(error instanceof Error ? error.message : "The recipe could not be uploaded.");
+      }
+    } finally {
+      if (uploadIdRef.current === uploadId) {
+        activeUploadRef.current = null;
+      }
     }
   };
 
@@ -318,7 +411,10 @@ function UploadButton({
         type="file"
         accept=".pdf,.txt,text/plain,application/pdf"
         disabled={uploading}
-        onChange={(event) => handleFile(event.target.files?.[0])}
+        onChange={(event) => {
+          void handleFile(event.target.files?.[0]);
+          event.currentTarget.value = "";
+        }}
       />
     </label>
   );
@@ -402,6 +498,14 @@ function ParsingState() {
           Extracting ingredients, timings, servings, and cooking steps.
         </p>
       </div>
+    </div>
+  );
+}
+
+function ChatLoadingState() {
+  return (
+    <div className="grid min-h-0 flex-1 place-items-center px-[22px] pb-[22px] text-center font-extrabold text-[#5e6a60]">
+      Loading chat
     </div>
   );
 }
