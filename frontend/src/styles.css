@@ -34,7 +34,7 @@
     border: 0;
   }
 
-  @media (min-width: 900px) and (orientation: landscape) and (max-height: 820px) {
+  @media (min-width: 1024px) and (orientation: landscape) and (max-height: 820px) {
     body {
       overflow: hidden;
     }

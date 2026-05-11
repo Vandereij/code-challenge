@@ -79,7 +79,7 @@ export function RecipeWorkspace({
   return (
     <div
       className={cx(
-        "recipe-workspace mx-auto grid min-h-[calc(100vh-28px)] max-w-[1220px] grid-cols-1 gap-4 md:h-full md:min-h-0 xl:gap-5",
+        "recipe-workspace mx-auto grid min-h-[calc(100vh-28px)] max-w-[1220px] grid-cols-1 gap-4 lg:h-full lg:min-h-0 xl:gap-5",
         "lg:grid-cols-[minmax(0,1.8fr)_minmax(310px,0.8fr)]",
       )}
     >
